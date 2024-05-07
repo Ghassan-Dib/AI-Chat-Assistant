@@ -1,14 +1,14 @@
-import {
-  MessageContent,
-  MessageContentType,
-  MessageDirection,
-} from '@chatscope/use-chat';
+import { MessageDirection } from '@chatscope/use-chat';
 import { OpenAIApi, Configuration } from 'openai';
+import { NextApiRequest, NextApiResponse } from 'next';
 
-export const processMessageToChatGPT = async (
-  inputText: MessageContent<MessageContentType>
-) => {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   try {
+    const { inputText } = req.body;
+
     const openai = new OpenAIApi(
       new Configuration({
         apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
@@ -31,13 +31,14 @@ export const processMessageToChatGPT = async (
     });
 
     const generatedText = response?.data?.choices[0]?.message?.content;
+    console.log('generatedText', generatedText);
 
-    return {
+    res.status(200).json({
       content: generatedText,
       direction: MessageDirection.Incoming,
-    };
+    });
   } catch (error) {
     console.error(error);
     throw new Error('Something went wrong');
   }
-};
+}

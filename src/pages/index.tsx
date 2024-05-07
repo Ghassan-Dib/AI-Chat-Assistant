@@ -9,7 +9,6 @@ import {
   MessageStatus,
   TextContent,
 } from '@chatscope/use-chat';
-import { processMessageToChatGPT } from './api/openai';
 
 const App = () => {
   const greetingMessage = new ChatMessage({
@@ -44,8 +43,15 @@ const App = () => {
     setIsTyping(true);
 
     try {
-      const response = await processMessageToChatGPT(newMessage.content);
-      setMessages((prevMessages: any) => [...prevMessages, response]);
+      const response = await fetch('/api/openai', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ inputText: message }),
+      });
+      const data = await response.json();
+      setMessages((prevMessages: any) => [...prevMessages, data]);
       setIsTyping(false);
     } catch (error) {
       console.error(error);
